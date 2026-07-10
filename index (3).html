@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #121214;
+    --surface: #1B1B1F;
+    --surface-2: #232328;
+    --surface-hover: #28282E;
+    --border: #2C2C33;
+    --text: #EDEDF0;
+    --text-muted: #8C8C96;
+    --text-dim: #5F5F68;
+    --accent: #7C7FFF;
+    --accent-soft: rgba(124,127,255,.16);
+    --accent-strong: #9C9EFF;
+    --key-color: #4FC9C0;
+    --key-soft: rgba(79,201,192,.16);
+    --radius: 10px;
+    --on-accent: #101014;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 18px 80px;
+  }
+  header{ margin-bottom: 22px; }
+  .title-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  h1{
+    font-family:'Inter', sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 5.5vw, 32px);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .total-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sub{
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 8px 0 0;
+  }
+
+  /* controls */
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin: 22px 0 20px;
+  }
+  .search-row{ position: relative; }
+  .search-row input[type="text"]{
+    width:100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px 12px 38px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .search-row input[type="text"]:focus{ border-color: var(--accent); }
+  .search-row input[type="text"]::placeholder{ color: var(--text-dim); }
+  .search-row svg{
+    position:absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    pointer-events:none;
+  }
+  .filter-groups{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+  .bpm-range{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .bpm-range input{
+    width: 46px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    outline:none;
+    text-align:center;
+  }
+  .bpm-range input::placeholder{ color: var(--text-dim); }
+
+  .key-trigger{
+    display:flex; align-items:center; gap:6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .12s ease;
+  }
+  .key-trigger:hover{ border-color: var(--key-color); }
+  .key-trigger.active{
+    background: var(--key-soft);
+    border-color: var(--key-color);
+    color: var(--key-color);
+  }
+
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all .12s ease;
+    white-space: nowrap;
+  }
+  .chip:hover{ border-color: var(--accent); color: var(--text); }
+  .chip.active{
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+  .clear-btn{
+    font-family:'Inter', sans-serif;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 6px 4px;
+  }
+  .clear-btn:hover{ color: var(--text-muted); }
+
+  /* list */
+  .count-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+  .count-row .n{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .loop-table{ display:flex; flex-direction:column; gap:6px; }
+
+  .col-headers{
+    display:grid;
+    grid-template-columns: 32px 1fr 52px 90px 1fr 30px;
+    gap: 10px;
+    padding: 0 12px 6px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .col-headers .num{ text-align:right; }
+
+  .row{
+    display:grid;
+    grid-template-columns: 32px 1fr 52px 90px 1fr 30px;
+    gap: 10px;
+    align-items:center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    transition: background .12s ease, border-color .12s ease;
+  }
+  .row:hover{ background: var(--surface-2); }
+  .row.playing{ border-color: var(--accent); background: var(--accent-soft); }
+
+  .play-btn{
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition: all .12s ease;
+  }
+  .play-btn:hover{ border-color: var(--accent); }
+  .row.playing .play-btn{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .play-btn svg{ width:12px; height:12px; }
+
+  .bars{ display:flex; align-items:center; gap:2px; height:12px; }
+  .bars span{
+    width:2px;
+    background: var(--on-accent);
+    border-radius:1px;
+    animation: bounce 0.9s infinite ease-in-out;
+  }
+  .bars span:nth-child(1){ height:40%; animation-delay: -0.3s;}
+  .bars span:nth-child(2){ height:100%; animation-delay: -0.15s;}
+  .bars span:nth-child(3){ height:65%; animation-delay: 0s;}
+  @keyframes bounce{
+    0%,100%{ transform: scaleY(0.4); }
+    50%{ transform: scaleY(1); }
+  }
+
+  .name{
+    font-size: 14px;
+    color: var(--text);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .bpm{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-align:right;
+  }
+  .key-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--key-color);
+    background: var(--key-soft);
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-align:center;
+    white-space:nowrap;
+  }
+  .tags{ display:flex; gap:5px; overflow:hidden; flex-wrap:nowrap; }
+  .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    padding: 3px 7px;
+    border-radius: 6px;
+    white-space:nowrap;
+  }
+  .dl-btn{
+    width: 28px; height: 28px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--text-muted);
+    border-radius:6px;
+    transition: all .12s ease;
+    flex-shrink:0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  .dl-btn:hover{ color: var(--accent); background: var(--surface-2); }
+  .dl-btn svg{ width:15px; height:15px; }
+  .dl-btn.loading{ opacity:.4; pointer-events:none; }
+
+  /* states */
+  .state{ text-align:center; padding: 60px 20px; color: var(--text-muted); }
+  .state .big{ font-family:'Inter', sans-serif; font-weight:600; font-size: 17px; color: var(--text); margin-bottom: 6px; }
+  .state code{
+    font-family:'IBM Plex Mono', monospace;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* key picker modal */
+  .modal-backdrop{
+    position: fixed; inset:0;
+    background: rgba(0,0,0,.65);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal-card{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-tabs{
+    display:flex;
+    gap: 4px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--border);
+  }
+  .modal-tab{
+    flex:1;
+    background:none; border:none;
+    color: var(--text-dim);
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding: 6px 4px 12px;
+    cursor:pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom:-1px;
+  }
+  .modal-tab.active{ color: var(--text); border-bottom-color: var(--accent); }
+
+  .key-grid{ display:grid; gap:8px; margin-bottom:8px; }
+  .key-grid.accidentals{ grid-template-columns: repeat(5,1fr); padding: 0 18px; }
+  .key-grid.naturals{ grid-template-columns: repeat(7,1fr); }
+
+  .note-btn{
+    aspect-ratio:1;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: all .12s ease;
+  }
+  .note-btn:hover{ border-color: var(--key-color); }
+  .note-btn.active{ background: var(--key-color); border-color: var(--key-color); color: var(--on-accent); font-weight:600; }
+
+  .mode-toggle{ display:flex; gap:8px; margin: 18px 0; }
+  .mode-btn{
+    flex:1;
+    padding: 10px;
+    border-radius: 8px;
+    border:1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+    transition: all .12s ease;
+  }
+  .mode-btn.active{ background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+  .modal-actions{ display:flex; justify-content:space-between; align-items:center; }
+  .modal-clear{
+    background:none; border:none;
+    color: var(--text-dim);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    cursor:pointer;
+  }
+  .modal-close{
+    background: var(--accent);
+    border:none;
+    color: var(--on-accent);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    cursor:pointer;
+  }
+
+  /* mobile */
+  @media (max-width: 640px){
+    .col-headers{ display:none; }
+    .row{ display:flex; flex-wrap:wrap; align-items:center; }
+    .name{ white-space: normal; }
+    .row > .play-btn{ order:1; margin-right:10px; }
+    .row > .name{ order:2; flex: 1 1 auto; min-width:0; }
+    .row > .dl-btn{ order:3; margin-left:8px; }
+    .row > .bpm{ order:4; flex-basis:100%; text-align:left; margin: 8px 0 0 40px; }
+    .row > .key-badge{ order:5; margin: 8px 0 0 8px; }
+    .row > .tags{ order:6; margin: 8px 0 0 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-row">
+      <h1>Loop Library</h1>
+      <span class="total-badge" id="totalBadge">— loops</span>
+    </div>
+    <p class="sub">Search your loops by name, key, or BPM.</p>
+  </header>
+
+  <div class="controls">
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="search by name or tag…">
+    </div>
+    <div class="filter-groups">
+      <div class="bpm-range">
+        <span>BPM</span>
+        <input type="number" id="bpmMin" placeholder="min">
+        <span>–</span>
+        <input type="number" id="bpmMax" placeholder="max">
+      </div>
+      <button class="key-trigger" id="keyTrigger">Key</button>
+      <div id="tagChips" class="filter-groups"></div>
+      <button class="clear-btn" id="clearBtn">clear filters</button>
+    </div>
+  </div>
+
+  <div class="count-row">
+    <span class="n" id="countLabel">loading…</span>
+  </div>
+
+  <div class="col-headers">
+    <span></span>
+    <span>Name</span>
+    <span class="num">BPM</span>
+    <span>Key</span>
+    <span>Tags</span>
+    <span></span>
+  </div>
+
+  <div class="loop-table" id="loopTable"></div>
+</div>
+
+<audio id="player"></audio>
+
+<div class="modal-backdrop" id="keyModalBackdrop">
+  <div class="modal-card">
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="flat">Flat Keys</button>
+      <button class="modal-tab" data-tab="sharp">Sharp Keys</button>
+    </div>
+    <div class="key-grid accidentals" id="accidentalRow"></div>
+    <div class="key-grid naturals" id="naturalRow"></div>
+    <div class="mode-toggle">
+      <button class="mode-btn" data-mode="major">Major</button>
+      <button class="mode-btn active" data-mode="minor">Minor</button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-clear" id="keyModalClear">Clear</button>
+      <button class="modal-close" id="keyModalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ CONFIGURE THIS ============ */
+const CONFIG = {
+  owner:  "YOUR_GITHUB_USERNAME",       // e.g. "mowbowx"
+  repo:   "Loop-libraryyy-MBX0906",     // your repo name
+  branch: "main",
+  folder: "loops"                       // folder inside the repo holding audio files
+};
+/* ========================================= */
+
+const AUDIO_EXT = ['.wav','.mp3','.aiff','.aif','.flac','.ogg','.m4a'];
+
+function esc(str){
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+
+const NOTE_TO_PC = {
+  'c':0,'b#':0,'c#':1,'db':1,'d':2,'d#':3,'eb':3,'e':4,'fb':4,
+  'f':5,'e#':5,'f#':6,'gb':6,'g':7,'g#':8,'ab':8,'a':9,'a#':10,'bb':10,'b':11,'cb':11
+};
+function parseKey(keyStr){
+  if (!keyStr) return { pc: null, mode: '' };
+  const m = keyStr.trim().match(/^([A-Ga-g])([#b]?)\s*(.*)$/);
+  if (!m) return { pc: null, mode: '' };
+  const noteKey = (m[1] + m[2]).toLowerCase();
+  const pc = NOTE_TO_PC[noteKey];
+  const modeWord = m[3].toLowerCase();
+  let mode = '';
+  if (modeWord.startsWith('min')) mode = 'minor';
+  else if (modeWord.startsWith('maj')) mode = 'major';
+  return { pc: pc !== undefined ? pc : null, mode };
+}
+
+const ACCIDENTALS = [
+  { pc:1, flat:'Db', sharp:'C#' },
+  { pc:3, flat:'Eb', sharp:'D#' },
+  { pc:6, flat:'Gb', sharp:'F#' },
+  { pc:8, flat:'Ab', sharp:'G#' },
+  { pc:10, flat:'Bb', sharp:'A#' },
+];
+const NATURALS = [
+  { pc:0, label:'C' },{ pc:2, label:'D' },{ pc:4, label:'E' },{ pc:5, label:'F' },
+  { pc:7, label:'G' },{ pc:9, label:'A' },{ pc:11, label:'B' },
+];
+const ALL_NOTES = [...ACCIDENTALS, ...NATURALS];
+
+const state = {
+  loops: [],
+  search: '',
+  bpmMin: null,
+  bpmMax: null,
+  activeTags: new Set(),
+  activeKeyPc: null,
+  activeKeyMode: 'minor',
+  keyTab: 'flat',
+  playingId: null
+};
+
+function parseFilename(filename){
+  const dot = filename.lastIndexOf('.');
+  const base = dot > -1 ? filename.slice(0, dot) : filename;
+  const parts = base.split(' - ').map(s => s.trim());
+  let name = base, bpm = null, key = '', tags = [];
+
+  if (parts.length >= 1){
+    const m = parts[0].match(/^(.*?)\s+(\d+)\s*bpm$/i);
+    if (m){ name = m[1].trim(); bpm = parseInt(m[2], 10); }
+    else { name = parts[0]; }
+  }
+  if (parts.length >= 2){ key = parts[1].trim(); }
+  if (parts.length >= 3){
+    tags = parts.slice(2).join(' ').split(',').map(t => t.trim()).filter(Boolean);
+  }
+  return { name, bpm, key, tags };
+}
+
+function setTotalBadge(text){
+  document.getElementById('totalBadge').textContent = text;
+}
+
+async function loadLoops(){
+  const table = document.getElementById('loopTable');
+  const countLabel = document.getElementById('countLabel');
+  table.innerHTML = `<div class="state"><div class="big">warming up…</div>reading the folder</div>`;
+  setTotalBadge('loading…');
+
+  if (CONFIG.owner === 'YOUR_GITHUB_USERNAME'){
+    table.innerHTML = `<div class="state"><div class="big">not configured yet</div>
+      open <code>index.html</code> and set <code>owner</code> at the top of the script.</div>`;
+    countLabel.textContent = '';
+    setTotalBadge('— loops');
+    return;
+  }
+
+  const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encodeURIComponent(CONFIG.folder)}?ref=${CONFIG.branch}`;
+
+  try{
+    const res = await fetch(apiUrl);
+    if (!res.ok){
+      if (res.status === 404){
+        table.innerHTML = `<div class="state"><div class="big">folder not found</div>
+          check that <code>${CONFIG.folder}/</code> exists in <code>${CONFIG.owner}/${CONFIG.repo}</code>.</div>`;
+      } else if (res.status === 403){
+        table.innerHTML = `<div class="state"><div class="big">rate limited</div>
+          GitHub's public API allows 60 checks/hour from one connection. wait a bit and reload.</div>`;
+      } else {
+        table.innerHTML = `<div class="state"><div class="big">couldn't load the reel</div>GitHub returned ${res.status}.</div>`;
+      }
+      countLabel.textContent = '';
+      setTotalBadge('— loops');
+      return;
+    }
+    const files = await res.json();
+    state.loops = files
+      .filter(f => f.type === 'file' && AUDIO_EXT.some(ext => f.name.toLowerCase().endsWith(ext)))
+      .map(f => {
+        const parsed = parseFilename(f.name);
+        const keyInfo = parseKey(parsed.key);
+        return {
+          id: f.sha,
+          filename: f.name,
+          url: `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.folder}/${encodeURIComponent(f.name)}`,
+          ...parsed,
+          keyPc: keyInfo.pc,
+          keyMode: keyInfo.mode
+        };
+      });
+
+    setTotalBadge(`${state.loops.length} loop${state.loops.length === 1 ? '' : 's'}`);
+    buildTagChips();
+    render();
+  } catch(err){
+    table.innerHTML = `<div class="state"><div class="big">connection hiccup</div>couldn't reach GitHub. check your connection and reload.</div>`;
+    countLabel.textContent = '';
+    setTotalBadge('— loops');
+  }
+}
+
+function buildTagChips(){
+  const tags = [...new Set(state.loops.flatMap(l => l.tags))].sort();
+  const tagWrap = document.getElementById('tagChips');
+  tagWrap.innerHTML = tags.map(t => `<span class="chip" data-tag="${esc(t)}">${esc(t)}</span>`).join('');
+  tagWrap.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.dataset.tag;
+      state.activeTags.has(t) ? state.activeTags.delete(t) : state.activeTags.add(t);
+      chip.classList.toggle('active');
+      render();
+    });
+  });
+}
+
+function getFiltered(){
+  let list = state.loops.filter(l => {
+    if (state.search){
+      const hay = (l.name + ' ' + l.tags.join(' ') + ' ' + l.key).toLowerCase();
+      if (!hay.includes(state.search.toLowerCase())) return false;
+    }
+    if (state.bpmMin != null && (l.bpm == null || l.bpm < state.bpmMin)) return false;
+    if (state.bpmMax != null && (l.bpm == null || l.bpm > state.bpmMax)) return false;
+    if (state.activeTags.size && !l.tags.some(t => state.activeTags.has(t))) return false;
+    if (state.activeKeyPc !== null){
+      if (l.keyPc !== state.activeKeyPc || l.keyMode !== state.activeKeyMode) return false;
+    }
+    return true;
+  });
+
+  list.sort((a,b) => a.name.localeCompare(b.name));
+  return list;
+}
+
+function render(){
+  const table = document.getElementById('loopTable');
+  const countLabel = document.getElementById('countLabel');
+  const filtered = getFiltered();
+
+  countLabel.textContent = `${filtered.length} of ${state.loops.length} loop${state.loops.length === 1 ? '' : 's'}`;
+
+  if (!filtered.length){
+    table.innerHTML = `<div class="state"><div class="big">nothing matches</div>try loosening a filter.</div>`;
+    return;
+  }
+
+  table.innerHTML = filtered.map(l => `
+    <div class="row ${state.playingId === l.id ? 'playing' : ''}" data-id="${l.id}">
+      <span class="play-btn" data-action="play" data-id="${l.id}">
+        ${state.playingId === l.id
+          ? `<span class="bars"><span></span><span></span><span></span></span>`
+          : `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`}
+      </span>
+      <span class="name" title="${esc(l.name)}">${esc(l.name)}</span>
+      <span class="bpm">${l.bpm != null ? l.bpm : '—'}</span>
+      <span class="key-badge">${esc(l.key) || '—'}</span>
+      <span class="tags">${l.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</span>
+      <button class="dl-btn" data-action="download" data-id="${l.id}" title="download" aria-label="Download ${esc(l.name)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      </button>
+    </div>
+  `).join('');
+
+  table.querySelectorAll('[data-action="play"]').forEach(btn => {
+    btn.addEventListener('click', () => togglePlay(btn.dataset.id));
+  });
+  table.querySelectorAll('[data-action="download"]').forEach(btn => {
+    btn.addEventListener('click', () => downloadLoop(btn.dataset.id, btn));
+  });
+}
+
+const player = document.getElementById('player');
+function togglePlay(id){
+  const loop = state.loops.find(l => l.id === id);
+  if (!loop) return;
+  if (state.playingId === id){
+    player.pause();
+    state.playingId = null;
+  } else {
+    player.src = loop.url;
+    player.play().catch(()=>{});
+    state.playingId = id;
+  }
+  render();
+}
+player.addEventListener('ended', () => { state.playingId = null; render(); });
+
+async function downloadLoop(id, btn){
+  const loop = state.loops.find(l => l.id === id);
+  if (!loop) return;
+  btn.classList.add('loading');
+  try{
+    const res = await fetch(loop.url);
+    if (!res.ok) throw new Error('fetch failed');
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = loop.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+  } catch(err){
+    alert(`Couldn't download "${loop.name}" — check your connection and try again.`);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+/* ---- key picker modal ---- */
+function buildKeyModal(){
+  document.getElementById('accidentalRow').innerHTML =
+    ACCIDENTALS.map(n => `<button class="note-btn" data-pc="${n.pc}"></button>`).join('');
+  document.getElementById('naturalRow').innerHTML =
+    NATURALS.map(n => `<button class="note-btn" data-pc="${n.pc}">${n.label}</button>`).join('');
+  updateAccidentalLabels();
+
+  document.querySelectorAll('.note-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pc = parseInt(btn.dataset.pc, 10);
+      state.activeKeyPc = (state.activeKeyPc === pc) ? null : pc;
+      updateKeyModalUI();
+    });
+  });
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeKeyMode = btn.dataset.mode;
+      updateKeyModalUI();
+    });
+  });
+  document.querySelectorAll('.modal-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      state.keyTab = tab.dataset.tab;
+      document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t === tab));
+      updateAccidentalLabels();
+      updateKeyTriggerLabel();
+    });
+  });
+
+  document.getElementById('keyTrigger').addEventListener('click', () => {
+    document.getElementById('keyModalBackdrop').classList.add('open');
+  });
+  document.getElementById('keyModalClose').addEventListener('click', closeKeyModal);
+  document.getElementById('keyModalClear').addEventListener('click', () => {
+    state.activeKeyPc = null;
+    updateKeyModalUI();
+  });
+  document.getElementById('keyModalBackdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'keyModalBackdrop') closeKeyModal();
+  });
+
+  updateKeyModalUI();
+}
+function closeKeyModal(){
+  document.getElementById('keyModalBackdrop').classList.remove('open');
+  render();
+}
+function updateAccidentalLabels(){
+  document.querySelectorAll('#accidentalRow .note-btn').forEach((btn, i) => {
+    btn.textContent = state.keyTab === 'flat' ? ACCIDENTALS[i].flat : ACCIDENTALS[i].sharp;
+  });
+}
+function updateKeyModalUI(){
+  document.querySelectorAll('.note-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.pc, 10) === state.activeKeyPc);
+  });
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === state.activeKeyMode);
+  });
+  updateKeyTriggerLabel();
+}
+function updateKeyTriggerLabel(){
+  const btn = document.getElementById('keyTrigger');
+  if (state.activeKeyPc === null){
+    btn.textContent = 'Key';
+    btn.classList.remove('active');
+    return;
+  }
+  const note = ALL_NOTES.find(n => n.pc === state.activeKeyPc);
+  const label = note.label || (state.keyTab === 'flat' ? note.flat : note.sharp);
+  const modeLabel = state.activeKeyMode === 'major' ? 'Major' : 'Minor';
+  btn.textContent = `${label} ${modeLabel}`;
+  btn.classList.add('active');
+}
+
+/* ---- other controls ---- */
+document.getElementById('searchInput').addEventListener('input', e => {
+  state.search = e.target.value;
+  render();
+});
+document.getElementById('bpmMin').addEventListener('input', e => {
+  state.bpmMin = e.target.value ? parseInt(e.target.value,10) : null;
+  render();
+});
+document.getElementById('bpmMax').addEventListener('input', e => {
+  state.bpmMax = e.target.value ? parseInt(e.target.value,10) : null;
+  render();
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  state.search = ''; state.bpmMin = null; state.bpmMax = null;
+  state.activeTags.clear();
+  state.activeKeyPc = null; state.activeKeyMode = 'minor'; state.keyTab = 'flat';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('bpmMin').value = '';
+  document.getElementById('bpmMax').value = '';
+  document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'flat'));
+  updateAccidentalLabels();
+  updateKeyModalUI();
+  render();
+});
+
+buildKeyModal();
+loadLoops();
+</script>
+</body>
+</html>
