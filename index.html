@@ -272,7 +272,8 @@
   .bpm{
     font-family:'IBM Plex Mono', monospace;
     font-size: 12.5px;
-    color: var(--text-muted);
+    color: #FFFFFF;
+    text-shadow: 0 0 10px rgba(255,255,255,.55);
     text-align:right;
   }
   .key-badge{
@@ -411,15 +412,15 @@
 
   /* mobile */
   @media (max-width: 640px){
-    .col-headers{ display:none; }
-    .row{ display:flex; flex-wrap:wrap; align-items:center; gap: 6px 10px; padding: 12px 14px; }
-    .name{ white-space: normal; }
-    .row > .play-btn{ order:1; }
-    .row > .name{ order:2; flex: 1 1 auto; min-width:0; }
-    .row > .dl-btn{ order:3; margin-left:auto; }
-    .row > .bpm{ order:4; text-align:left; margin-left:42px; }
-    .row > .bpm::before{ content: 'BPM '; color: var(--text-dim); font-weight:400; }
-    .row > .key-badge{ order:5; }
+    .col-headers{ grid-template-columns: 24px 1fr 40px 62px 22px; gap: 6px; padding: 0 10px 6px; font-size: 9.5px; }
+    .row{ grid-template-columns: 24px 1fr 40px 62px 22px; gap: 6px; padding: 10px; }
+    .name{ font-size: 13px; }
+    .bpm{ font-size: 11px; }
+    .key-badge{ font-size: 10px; padding: 3px 5px; }
+    .play-btn{ width: 24px; height: 24px; }
+    .play-btn svg{ width: 10px; height: 10px; }
+    .dl-btn{ width: 22px; height: 22px; }
+    .dl-btn svg{ width: 13px; height: 13px; }
   }
 </style>
 </head>
