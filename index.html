@@ -9,27 +9,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0A0A0C;
-    --surface: #17151A;
-    --surface-2: #1F1D22;
-    --surface-hover: #262229;
-    --border: #2B2730;
-    --text: #F3F1F2;
-    --text-muted: #948F95;
-    --text-dim: #5C575E;
-    --accent: #FF2E4D;
-    --accent-soft: rgba(255,46,77,.16);
-    --accent-strong: #FF6B82;
-    --key-color: #FF8A3D;
-    --key-soft: rgba(255,138,61,.16);
+    --bg: #000000;
+    --surface: #101010;
+    --surface-2: #191919;
+    --surface-hover: #212121;
+    --border: #272727;
+    --text: #F5F5F5;
+    --text-muted: #949494;
+    --text-dim: #5C5C5C;
+    --accent: #FF1030;
+    --accent-soft: rgba(255,16,48,.14);
+    --accent-strong: #FF5C74;
+    --key-color: #FF6A1F;
+    --key-soft: rgba(255,106,31,.14);
     --radius: 10px;
-    --on-accent: #0A0A0C;
-    --glow: 0 0 16px rgba(255,46,77,.4);
+    --on-accent: #000000;
+    --glow: 0 0 24px rgba(255,16,48,.6);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background: var(--bg);
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,16,48,.20), transparent 65%),
+      var(--bg);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     min-height:100vh;
@@ -59,10 +61,11 @@
     font-size: 12.5px;
     color: var(--accent-strong);
     background: var(--accent-soft);
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent);
     padding: 4px 10px;
     border-radius: 999px;
     white-space: nowrap;
+    box-shadow: 0 0 12px rgba(255,16,48,.35);
   }
   .sub{
     color: var(--text-muted);
@@ -145,7 +148,7 @@
     background: var(--key-soft);
     border-color: var(--key-color);
     color: var(--key-color);
-    box-shadow: 0 0 14px rgba(255,138,61,.3);
+    box-shadow: 0 0 14px rgba(255,106,31,.3);
   }
 
   .chip{
@@ -166,7 +169,7 @@
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent-strong);
-    box-shadow: 0 0 12px rgba(255,46,77,.25);
+    box-shadow: 0 0 12px rgba(255,16,48,.3);
   }
   .clear-btn{
     font-family:'Inter', sans-serif;
@@ -199,7 +202,7 @@
 
   .col-headers{
     display:grid;
-    grid-template-columns: 32px 1fr 52px 90px 1fr 30px;
+    grid-template-columns: 32px 1fr 52px 90px 30px;
     gap: 10px;
     padding: 0 12px 6px;
     font-family:'IBM Plex Mono', monospace;
@@ -212,7 +215,7 @@
 
   .row{
     display:grid;
-    grid-template-columns: 32px 1fr 52px 90px 1fr 30px;
+    grid-template-columns: 32px 1fr 52px 90px 30px;
     gap: 10px;
     align-items:center;
     background: var(--surface);
@@ -280,16 +283,6 @@
     padding: 3px 8px;
     border-radius: 6px;
     text-align:center;
-    white-space:nowrap;
-  }
-  .tags{ display:flex; gap:5px; overflow:hidden; flex-wrap:nowrap; }
-  .tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--accent-strong);
-    background: var(--accent-soft);
-    padding: 3px 7px;
-    border-radius: 6px;
     white-space:nowrap;
   }
   .dl-btn{
@@ -376,7 +369,7 @@
     transition: all .12s ease;
   }
   .note-btn:hover{ border-color: var(--key-color); }
-  .note-btn.active{ background: var(--key-color); border-color: var(--key-color); color: var(--on-accent); font-weight:600; box-shadow: 0 0 14px rgba(255,138,61,.4); }
+  .note-btn.active{ background: var(--key-color); border-color: var(--key-color); color: var(--on-accent); font-weight:600; box-shadow: 0 0 14px rgba(255,106,31,.45); }
 
   .mode-toggle{ display:flex; gap:8px; margin: 18px 0; }
   .mode-btn{
@@ -392,7 +385,7 @@
     cursor:pointer;
     transition: all .12s ease;
   }
-  .mode-btn.active{ background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 0 14px rgba(255,46,77,.35); }
+  .mode-btn.active{ background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 0 14px rgba(255,16,48,.4); }
 
   .modal-actions{ display:flex; justify-content:space-between; align-items:center; }
   .modal-clear{
@@ -419,14 +412,14 @@
   /* mobile */
   @media (max-width: 640px){
     .col-headers{ display:none; }
-    .row{ display:flex; flex-wrap:wrap; align-items:center; gap: 8px 10px; padding: 14px; }
+    .row{ display:flex; flex-wrap:wrap; align-items:center; gap: 6px 10px; padding: 12px 14px; }
     .name{ white-space: normal; }
     .row > .play-btn{ order:1; }
     .row > .name{ order:2; flex: 1 1 auto; min-width:0; }
     .row > .dl-btn{ order:3; margin-left:auto; }
-    .row > .bpm{ order:4; flex-basis:100%; margin-left:42px; }
-    .row > .key-badge{ order:5; margin-left:42px; }
-    .row > .tags{ order:6; }
+    .row > .bpm{ order:4; text-align:left; margin-left:42px; }
+    .row > .bpm::before{ content: 'BPM '; color: var(--text-dim); font-weight:400; }
+    .row > .key-badge{ order:5; }
   }
 </style>
 </head>
@@ -467,7 +460,6 @@
     <span>Name</span>
     <span class="num">BPM</span>
     <span>Key</span>
-    <span>Tags</span>
     <span></span>
   </div>
 
@@ -578,6 +570,14 @@ function setTotalBadge(text){
   document.getElementById('totalBadge').textContent = text;
 }
 
+function shuffleLoops(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 async function loadLoops(){
   const table = document.getElementById('loopTable');
   const countLabel = document.getElementById('countLabel');
@@ -626,6 +626,7 @@ async function loadLoops(){
         };
       });
 
+    shuffleLoops(state.loops);
     setTotalBadge(`${state.loops.length} loop${state.loops.length === 1 ? '' : 's'}`);
     buildTagChips();
     render();
@@ -640,6 +641,13 @@ function buildTagChips(){
   const excluded = new Set(CONFIG.excludeTags.map(t => t.toLowerCase()));
   const tags = [...new Set(state.loops.flatMap(l => l.tags))]
     .filter(t => !excluded.has(t.toLowerCase()))
+    .filter(t => {
+      // if a "tag" is actually a valid "Note + major/minor" pattern, it's almost
+      // certainly a key value that ended up in the wrong field from a filename
+      // that didn't match the usual "Name BPM - Key - @tag" layout — not a real tag.
+      const k = parseKey(t);
+      return !(k.pc !== null && k.mode);
+    })
     .sort();
 
   const tagWrap = document.getElementById('tagChips');
@@ -669,7 +677,6 @@ function getFiltered(){
     return true;
   });
 
-  list.sort((a,b) => a.name.localeCompare(b.name));
   return list;
 }
 
@@ -695,7 +702,6 @@ function render(){
       <span class="name" title="${esc(l.name)}">${esc(l.name)}</span>
       <span class="bpm">${l.bpm != null ? l.bpm : '—'}</span>
       <span class="key-badge">${esc(l.key) || '—'}</span>
-      <span class="tags">${l.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</span>
       <button class="dl-btn" data-action="download" data-id="${l.id}" title="download" aria-label="Download ${esc(l.name)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
       </button>
