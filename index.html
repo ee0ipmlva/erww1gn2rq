@@ -9,21 +9,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #121214;
-    --surface: #1B1B1F;
-    --surface-2: #232328;
-    --surface-hover: #28282E;
-    --border: #2C2C33;
-    --text: #EDEDF0;
-    --text-muted: #8C8C96;
-    --text-dim: #5F5F68;
-    --accent: #7C7FFF;
-    --accent-soft: rgba(124,127,255,.16);
-    --accent-strong: #9C9EFF;
-    --key-color: #4FC9C0;
-    --key-soft: rgba(79,201,192,.16);
+    --bg: #0A0A0C;
+    --surface: #17151A;
+    --surface-2: #1F1D22;
+    --surface-hover: #262229;
+    --border: #2B2730;
+    --text: #F3F1F2;
+    --text-muted: #948F95;
+    --text-dim: #5C575E;
+    --accent: #FF2E4D;
+    --accent-soft: rgba(255,46,77,.16);
+    --accent-strong: #FF6B82;
+    --key-color: #FF8A3D;
+    --key-soft: rgba(255,138,61,.16);
     --radius: 10px;
-    --on-accent: #101014;
+    --on-accent: #0A0A0C;
+    --glow: 0 0 16px rgba(255,46,77,.4);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -144,6 +145,7 @@
     background: var(--key-soft);
     border-color: var(--key-color);
     color: var(--key-color);
+    box-shadow: 0 0 14px rgba(255,138,61,.3);
   }
 
   .chip{
@@ -164,6 +166,7 @@
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent-strong);
+    box-shadow: 0 0 12px rgba(255,46,77,.25);
   }
   .clear-btn{
     font-family:'Inter', sans-serif;
@@ -219,7 +222,7 @@
     transition: background .12s ease, border-color .12s ease;
   }
   .row:hover{ background: var(--surface-2); }
-  .row.playing{ border-color: var(--accent); background: var(--accent-soft); }
+  .row.playing{ border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--glow); }
 
   .play-btn{
     width: 30px; height: 30px;
@@ -237,6 +240,7 @@
     background: var(--accent);
     border-color: var(--accent);
     color: var(--on-accent);
+    box-shadow: var(--glow);
   }
   .play-btn svg{ width:12px; height:12px; }
 
@@ -372,7 +376,7 @@
     transition: all .12s ease;
   }
   .note-btn:hover{ border-color: var(--key-color); }
-  .note-btn.active{ background: var(--key-color); border-color: var(--key-color); color: var(--on-accent); font-weight:600; }
+  .note-btn.active{ background: var(--key-color); border-color: var(--key-color); color: var(--on-accent); font-weight:600; box-shadow: 0 0 14px rgba(255,138,61,.4); }
 
   .mode-toggle{ display:flex; gap:8px; margin: 18px 0; }
   .mode-btn{
@@ -388,7 +392,7 @@
     cursor:pointer;
     transition: all .12s ease;
   }
-  .mode-btn.active{ background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .mode-btn.active{ background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 0 14px rgba(255,46,77,.35); }
 
   .modal-actions{ display:flex; justify-content:space-between; align-items:center; }
   .modal-clear{
@@ -415,14 +419,14 @@
   /* mobile */
   @media (max-width: 640px){
     .col-headers{ display:none; }
-    .row{ display:flex; flex-wrap:wrap; align-items:center; }
+    .row{ display:flex; flex-wrap:wrap; align-items:center; gap: 8px 10px; padding: 14px; }
     .name{ white-space: normal; }
-    .row > .play-btn{ order:1; margin-right:10px; }
+    .row > .play-btn{ order:1; }
     .row > .name{ order:2; flex: 1 1 auto; min-width:0; }
-    .row > .dl-btn{ order:3; margin-left:8px; }
-    .row > .bpm{ order:4; flex-basis:100%; text-align:left; margin: 8px 0 0 40px; }
-    .row > .key-badge{ order:5; margin: 8px 0 0 8px; }
-    .row > .tags{ order:6; margin: 8px 0 0 8px; }
+    .row > .dl-btn{ order:3; margin-left:auto; }
+    .row > .bpm{ order:4; flex-basis:100%; margin-left:42px; }
+    .row > .key-badge{ order:5; margin-left:42px; }
+    .row > .tags{ order:6; }
   }
 </style>
 </head>
@@ -497,7 +501,8 @@ const CONFIG = {
   owner:  "mowbowx",       // e.g. "mowbowx"
   repo:   "Loop-libraryyy-MBX0906",     // your repo name
   branch: "main",
-  folder: "loops"                       // folder inside the repo holding audio files
+  folder: "loops",                      // folder inside the repo holding audio files
+  excludeTags: ["@mowbowx"]             // tags that should NEVER show as a filter chip, no matter what
 };
 /* ========================================= */
 
@@ -632,7 +637,11 @@ async function loadLoops(){
 }
 
 function buildTagChips(){
-  const tags = [...new Set(state.loops.flatMap(l => l.tags))].sort();
+  const excluded = new Set(CONFIG.excludeTags.map(t => t.toLowerCase()));
+  const tags = [...new Set(state.loops.flatMap(l => l.tags))]
+    .filter(t => !excluded.has(t.toLowerCase()))
+    .sort();
+
   const tagWrap = document.getElementById('tagChips');
   tagWrap.innerHTML = tags.map(t => `<span class="chip" data-tag="${esc(t)}">${esc(t)}</span>`).join('');
   tagWrap.querySelectorAll('.chip').forEach(chip => {
